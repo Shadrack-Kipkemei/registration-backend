@@ -1,0 +1,40 @@
+{
+    "stations": [
+        {
+            "id": 1,
+            "name": "Eldoret East Station",
+            "districts": [
+                {
+                    "id": 1,
+                    "name": "Ngoisa District",
+                    "churches": [
+                        {
+                            "id": 1,
+                            "name": "Kabenes Church"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Eldoret North Station",
+            "districts": []
+        },
+        {
+            "id": 3,
+            "name": "Eldoret West Station",
+            "districts": []
+        },
+        {
+            "id": 4,
+            "name": "Eldoret South Station",
+            "districts": []
+        },
+        {
+            "id": 5,
+            "name": "Segero Station",
+            "districts": []
+        }
+    ]
+}
