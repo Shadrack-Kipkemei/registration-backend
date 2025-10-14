@@ -14,7 +14,7 @@ class Station(db.Model, SerializerMixin):
 
 
 class District(db.Model, SerializerMixin):
-    __table__ = 'districts'
+    __tablename__ = 'districts'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     station_id = db.Column(db.Integer, db.ForeignKey('stations.id'), nullable=False)
@@ -24,6 +24,6 @@ class District(db.Model, SerializerMixin):
 
 class Church(db.Model, SerializerMixin):
     __tablename__ = 'churches'
-    id = db.Clumn(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     district_id = db.Column(db.Integer, db.ForeignKey('districts.id'), nullable=False)
