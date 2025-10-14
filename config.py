@@ -1,8 +1,19 @@
-import os
+from flask import Flask 
+from flask_sqlalchemy import SQLAlchemy 
+from flask_migrate import Migrate 
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+db = SQLAlchemy()
+migrate = Migrate()
 
-class Config:
-    SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(basedir, 'locations.db')}"
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = "supersecretkey"
+
+def create_app():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///locations.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SECRET_KEY'] = 'supersecretkey'
+
+    db.init_app(app)
+    migrate.init_app(app, db)
+
+
+    return app 
