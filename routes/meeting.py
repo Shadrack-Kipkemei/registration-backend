@@ -1,30 +1,17 @@
 from flask import Blueprint, jsonify, request
 from config import db
 from models import Meeting
-from functools import wraps
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 meeting_bp = Blueprint('meeting', __name__)
 
 # -------------------------------
-# Simple Admin Authentication Check
-# -------------------------------
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        admin_key = request.headers.get("X-Admin-Key")
-        if admin_key != "supersecretadminkey":  # Change this to your real key system
-            return jsonify({"error": "Unauthorized. Admin access only."}), 403
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-# -------------------------------
-# CRUD Routes for Meeting
+# CRUD ROUTES FOR MEETING (ADMIN ONLY)
 # -------------------------------
 
 # ✅ READ all meetings
 @meeting_bp.route('/meetings', methods=['GET'])
-@admin_required
+@jwt_required()
 def get_meetings():
     meetings = Meeting.query.all()
     if not meetings:
@@ -44,7 +31,7 @@ def get_meetings():
 
 # ✅ READ one meeting
 @meeting_bp.route('/meetings/<int:id>', methods=['GET'])
-@admin_required
+@jwt_required()
 def get_meeting(id):
     meeting = Meeting.query.get(id)
     if not meeting:
@@ -60,14 +47,16 @@ def get_meeting(id):
     }), 200
 
 
-# ✅ CREATE new meeting
+# ✅ CREATE a new meeting
 @meeting_bp.route('/meetings', methods=['POST'])
-@admin_required
+@jwt_required()
 def create_meeting():
-    data = request.json
+    data = request.get_json()
 
-    if not data.get("title") or not data.get("date") or not data.get("deadline"):
-        return jsonify({"error": "Title, date, and deadline are required"}), 400
+    required_fields = ["title", "date", "deadline"]
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({"error": f"{field} is required"}), 400
 
     meeting = Meeting(
         title=data["title"],
@@ -77,23 +66,21 @@ def create_meeting():
         poster_url=data.get("poster_url"),
         description=data.get("description")
     )
-
     db.session.add(meeting)
     db.session.commit()
 
     return jsonify({"message": "Meeting created successfully", "id": meeting.id}), 201
 
 
-# ✅ UPDATE a meeting
+# ✅ UPDATE meeting
 @meeting_bp.route('/meetings/<int:id>', methods=['PUT'])
-@admin_required
+@jwt_required()
 def update_meeting(id):
     meeting = Meeting.query.get(id)
     if not meeting:
         return jsonify({"error": "Meeting not found"}), 404
 
-    data = request.json
-
+    data = request.get_json()
     meeting.title = data.get('title', meeting.title)
     meeting.date = data.get('date', meeting.date)
     meeting.deadline = data.get('deadline', meeting.deadline)
@@ -102,13 +89,12 @@ def update_meeting(id):
     meeting.description = data.get('description', meeting.description)
 
     db.session.commit()
-
     return jsonify({"message": "Meeting updated successfully"}), 200
 
 
-# ✅ DELETE a meeting
+# ✅ DELETE meeting
 @meeting_bp.route('/meetings/<int:id>', methods=['DELETE'])
-@admin_required
+@jwt_required()
 def delete_meeting(id):
     meeting = Meeting.query.get(id)
     if not meeting:
