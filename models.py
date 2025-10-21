@@ -61,3 +61,39 @@ class Attendee(db.Model, SerializerMixin):
     name = db.Column(db.String(120), nullable=False)
     age = db.Column(db.Integer, nullable=False)
     registration_id = db.Column(db.Integer, db.ForeignKey('registration.id'))
+
+
+
+# _______________ ADMIN MODELS _______________
+class Admin(db.Model, SerializerMixin):
+    __tablename__ = 'admins'
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default='admin') # 'admin' or 'super_admin'
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+    # Exclude sensitive data from serialization
+    serialize_rules = ('-password_hash',)
+
+    # Password handling
+    @property
+    def password(self)
+        raise AttributeError("password is write-only.")
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    def check_password(self, password):
+        return bcrypt.check_password_hash(self.password_hash, password)
+
+    def is_super_admin(self):
+        return self.role == 'super_admin'
+
+    def __repr__(self):
+        return f"<Admin {self.name} ({self.role})>"
